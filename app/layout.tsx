@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Resume & Invoice Editor",
-  description: "Professional drag-and-drop editor for resumes and invoices",
+  title: "Invoice creater - Modern Minimal",
+  description: "Professional invoice and document editor with modern minimal design",
 };
 
 export default function RootLayout({

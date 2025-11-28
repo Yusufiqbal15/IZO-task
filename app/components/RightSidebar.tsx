@@ -40,10 +40,89 @@ export default function RightSidebar({
 
   if (!selectedElement) {
     return (
-      <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Properties</h2>
-          <p className="text-sm text-gray-500">Select an element to edit its properties</p>
+      <div className="w-80 bg-gray-50 border-l border-gray-200 flex flex-col h-full">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200 bg-white">
+          <h2 className="text-lg font-semibold text-gray-800 mb-1">Basic</h2>
+        </div>
+
+        {/* Layout Options */}
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {/* Table Layout */}
+            <div className="flex flex-col items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center">
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-gray-700">Table</span>
+            </div>
+
+            {/* 1 Column Layout */}
+            <div className="flex flex-col items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center">
+                <div className="w-6 h-6 bg-gray-300 rounded"></div>
+              </div>
+              <span className="text-xs font-medium text-gray-700">1 Column</span>
+            </div>
+
+            {/* 1/2 Section Layout */}
+            <div className="flex flex-col items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center gap-1">
+                <div className="w-2 h-6 bg-gray-300 rounded"></div>
+                <div className="w-3 h-6 bg-gray-300 rounded"></div>
+              </div>
+              <span className="text-xs font-medium text-gray-700">1/2 Section</span>
+            </div>
+
+            {/* 3/7 Section Layout */}
+            <div className="flex flex-col items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center gap-1">
+                <div className="w-2 h-6 bg-gray-300 rounded"></div>
+                <div className="w-4 h-6 bg-gray-300 rounded"></div>
+              </div>
+              <span className="text-xs font-medium text-gray-700">3/7 Section</span>
+            </div>
+
+            {/* 1/3 Section Layout */}
+            <div className="flex flex-col items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center">
+                <div className="grid grid-cols-3 gap-0.5 w-6 h-6">
+                  <div className="bg-gray-300 rounded-sm"></div>
+                  <div className="bg-gray-300 rounded-sm"></div>
+                  <div className="bg-gray-300 rounded-sm"></div>
+                </div>
+              </div>
+              <span className="text-xs font-medium text-gray-700">1/3 Section</span>
+            </div>
+
+            {/* Divider Layout */}
+            <div className="flex flex-col items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors">
+              <div className="w-8 h-8 mb-2 flex items-center justify-center">
+                <div className="w-6 h-0.5 bg-gray-400"></div>
+              </div>
+              <span className="text-xs font-medium text-gray-700">Divider</span>
+            </div>
+          </div>
+
+          {/* Text Tools */}
+          <div className="pt-4 border-t border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              Text
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button className="p-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors text-sm">
+                Heading
+              </button>
+              <button className="p-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors text-sm">
+                Paragraph
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
