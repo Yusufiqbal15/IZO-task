@@ -10,6 +10,15 @@ import { templates, Template } from './data/templates';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
+export interface TableCell {
+  id: string;
+  content: string;
+  width?: number; // relative width (1-10)
+  height?: number; // relative height (1-10)
+  backgroundColor?: string;
+  textColor?: string;
+}
+
 export interface CanvasElement {
   id: string;
   type: 'text' | 'heading' | 'paragraph' | 'image' | 'shape' | 'table' | 'icon' | 'block';
@@ -33,6 +42,9 @@ export interface CanvasElement {
   src?: string;
   shapeType?: 'rectangle' | 'circle' | 'line';
   zIndex?: number;
+  rows?: number;
+  cols?: number;
+  cells?: TableCell[];
 }
 
 export default function Home() {
@@ -259,7 +271,7 @@ export default function Home() {
 
   // Show editor
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+    <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden">
       <TopNavbar
         zoom={zoom}
         onZoomChange={setZoom}
@@ -272,12 +284,17 @@ export default function Home() {
           setShowEditor(false);
         }}
         />
-      <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar
-          onAddElement={handleAddElement}
-          onLoadTemplate={handleLoadTemplate}
-        />
-        <div className="flex-1 overflow-auto bg-gray-100" style={{ padding: '40px' }} ref={canvasContainerRef}>
+      <div className="flex flex-1 overflow-hidden gap-0">
+        {/* Left Sidebar */}
+        <div className="hidden lg:block">
+          <LeftSidebar
+            onAddElement={handleAddElement}
+            onLoadTemplate={handleLoadTemplate}
+          />
+        </div>
+        
+        {/* Canvas Area */}
+        <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center" ref={canvasContainerRef}>
           <EditorCanvas
             elements={elements}
             selectedElement={selectedElement}
@@ -287,11 +304,16 @@ export default function Home() {
             zoom={zoom}
           />
         </div>
-        <RightSidebar
-          selectedElement={selectedElement}
-          onUpdateElement={handleUpdateElement}
-          onDeleteElement={handleDeleteElement}
-        />
+        
+        {/* Right Sidebar */}
+        <div className="hidden md:block">
+          <RightSidebar
+            selectedElement={selectedElement}
+            onUpdateElement={handleUpdateElement}
+            onDeleteElement={handleDeleteElement}
+            onAddElement={handleAddElement}
+          />
+        </div>
       </div>
     </div>
   );
