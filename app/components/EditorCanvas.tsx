@@ -12,20 +12,6 @@ interface EditorCanvasProps {
   zoom: number;
 }
 
-interface SelectedCell {
-  tableId: string;
-  cellIndex: number;
-}
-
-interface CellMergeGroup {
-  id: string;
-  cellIndices: number[];
-  width: number;
-  height: number;
-  backgroundColor: string;
-  textColor: string;
-  content: string;
-}
 
 const PAGE_WIDTH = 595; // A4 width in pixels at 72 DPI
 const PAGE_HEIGHT = 842; // A4 height in pixels at 72 DPI
@@ -102,17 +88,17 @@ export default function EditorCanvas({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
-  const [selectedCells, setSelectedCells] = useState<Set<number>>(new Set());
-  const [resizingCell, setResizingCell] = useState<{ tableId: string; cellIndex: number; direction: string } | null>(null);
-  const [cellResizeStart, setCellResizeStart] = useState({ x: 0, y: 0 });
-  const [isDraggingSelection, setIsDraggingSelection] = useState(false);
-  const [dragSelectionStart, setDragSelectionStart] = useState({ x: 0, y: 0 });
-  const [isTableCellMode, setIsTableCellMode] = useState(false);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, element: CanvasElement) => {
     if (e.target instanceof HTMLElement && e.target.classList.contains('resize-handle')) {
       return; // Let resize handler take over
+    }
+    
+    // Don't drag if clicking on a table cell (allow editing)
+    if (element.type === 'table' && e.target instanceof HTMLElement && e.target.tagName === 'TD') {
+      e.stopPropagation();
+      onSelectElement(element);
+      return;
     }
     
     e.stopPropagation();
@@ -242,6 +228,95 @@ export default function EditorCanvas({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  // Table Element Component
+  const TableElement = ({ element }: { element: CanvasElement }) => {
+    const rows = element.rows || 3;
+    const cols = element.cols || 3;
+    const tableData = element.tableData || [];
+    const rowHeights = element.rowHeights || Array(rows).fill(element.height / rows);
+    const colWidths = element.colWidths || Array(cols).fill(element.width / cols);
+    const tableBorder = element.tableBorder || '1px solid #ccc';
+    const tableHeaderBg = element.tableHeaderBg || '#e5e7eb';
+    const tableCellBg = element.tableCellBg || '#ffffff';
+
+    const handleCellChange = (rowIdx: number, colIdx: number, content: string) => {
+      const newTableData = tableData.map((row, r) => 
+        r === rowIdx 
+          ? row.map((cell, c) => 
+              c === colIdx 
+                ? { ...cell, content } 
+                : cell
+            )
+          : row
+      );
+      
+      // Ensure array structure exists
+      while (newTableData.length <= rowIdx) {
+        newTableData.push([]);
+      }
+      while (newTableData[rowIdx].length <= colIdx) {
+        newTableData[rowIdx].push({ content: '' });
+      }
+      
+      onUpdateElement(element.id, { tableData: newTableData });
+    };
+
+    return (
+      <table
+        style={{
+          width: '100%',
+          height: '100%',
+          borderCollapse: 'collapse',
+          border: tableBorder,
+          fontSize: '12px',
+        }}
+      >
+        <tbody>
+          {Array(rows).fill(null).map((_, rowIdx) => (
+            <tr key={rowIdx} style={{ height: `${rowHeights[rowIdx] || 40}px` }}>
+              {Array(cols).fill(null).map((_, colIdx) => {
+                const cellData = tableData[rowIdx]?.[colIdx];
+                const isHeader = rowIdx === 0;
+                return (
+                  <td
+                    key={`${rowIdx}-${colIdx}`}
+                    style={{
+                      border: tableBorder,
+                      padding: '8px',
+                      width: `${colWidths[colIdx] || element.width / cols}px`,
+                      backgroundColor: isHeader ? tableHeaderBg : tableCellBg,
+                      textAlign: 'left',
+                      verticalAlign: 'middle',
+                      wordWrap: 'break-word',
+                      overflow: 'hidden',
+                      cursor: 'default',
+                      minHeight: '100%',
+                      fontSize: '13px',
+                      fontFamily: 'Arial, sans-serif',
+                      outline: 'none',
+                      userSelect: 'none',
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onMouseMove={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    {cellData?.content || ''}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
+
   const renderElement = (element: CanvasElement) => {
     const isSelected = selectedElement?.id === element.id;
     const style: React.CSSProperties = {
@@ -305,171 +380,6 @@ export default function EditorCanvas({
         style.transformOrigin = 'left center';
       }
       content = null;
-    } else if (element.type === 'table') {
-      const rows = element.rows || 4;
-      const cols = element.cols || 4;
-      const cells = element.cells || Array.from({ length: rows * cols }).map((_, idx) => ({
-        id: `cell-${idx}`,
-        content: idx === 0 ? 'Header' : `Cell ${idx}`,
-        width: 1,
-        height: 1,
-        backgroundColor: '#ffffff',
-        textColor: '#666666',
-      }));
-      
-      content = (
-        <div 
-          className="w-full h-full relative"
-          style={{ display: 'grid', gridTemplateColumns: cells.slice(0, cols).map(c => `${(c.width || 1) * 100 / cols}%`).join(' '), gridTemplateRows: `repeat(${rows}, 1fr)`, gap: 0 }}
-          onMouseDown={(e) => {
-            // Prevent table dragging when clicking inside cells
-            if (e.target instanceof HTMLElement && !e.target.classList.contains('resize-handle')) {
-              e.stopPropagation();
-              setIsTableCellMode(true);
-              setIsDraggingSelection(true);
-              setDragSelectionStart({ x: e.clientX, y: e.clientY });
-            }
-          }}
-          onMouseMove={(e) => {
-            if (resizingCell) {
-              const deltaX = e.clientX - cellResizeStart.x;
-              const deltaY = e.clientY - cellResizeStart.y;
-              const newCells = [...cells];
-              
-              // Resize all selected cells proportionally
-              selectedCells.forEach(cellIdx => {
-                const cell = newCells[cellIdx];
-                if (resizingCell.direction === 'width') {
-                  cell.width = Math.max(0.2, (cell.width || 1) + deltaX * 0.005);
-                } else if (resizingCell.direction === 'height') {
-                  cell.height = Math.max(0.2, (cell.height || 1) + deltaY * 0.005);
-                } else if (resizingCell.direction === 'both') {
-                  cell.width = Math.max(0.2, (cell.width || 1) + deltaX * 0.005);
-                  cell.height = Math.max(0.2, (cell.height || 1) + deltaY * 0.005);
-                }
-              });
-              
-              // Normalize cells to fit in table
-              const totalWidth = newCells.reduce((sum, c) => sum + (c.width || 1), 0);
-              const totalHeight = newCells.reduce((sum, c, idx) => {
-                if (idx % cols === 0) return sum + (c.height || 1);
-                return sum;
-              }, 0);
-              
-              // Scale cells to maintain table size
-              newCells.forEach(cell => {
-                cell.width = (cell.width || 1) * (cols / totalWidth);
-                cell.height = (cell.height || 1) * (rows / totalHeight);
-              });
-              
-              onUpdateElement(element.id, { cells: newCells });
-              setCellResizeStart({ x: e.clientX, y: e.clientY });
-            }
-          }}
-          onMouseUp={() => {
-            setResizingCell(null);
-            setIsDraggingSelection(false);
-            setIsTableCellMode(false);
-          }}
-          onMouseLeave={() => {
-            setResizingCell(null);
-            setIsDraggingSelection(false);
-            setIsTableCellMode(false);
-          }}
-        >
-          {cells.map((cell, idx) => {
-            const isSingleSelected = selectedCell?.tableId === element.id && selectedCell?.cellIndex === idx;
-            const isMultiSelected = selectedCells.has(idx);
-            const isAnySelected = isSingleSelected || isMultiSelected;
-            
-            return (
-              <div
-                key={cell.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (e.ctrlKey || e.metaKey) {
-                    // Multi-select with Ctrl/Cmd
-                    const newSelected = new Set(selectedCells);
-                    if (newSelected.has(idx)) {
-                      newSelected.delete(idx);
-                    } else {
-                      newSelected.add(idx);
-                    }
-                    setSelectedCells(newSelected);
-                  } else {
-                    // Single select
-                    setSelectedCell({ tableId: element.id, cellIndex: idx });
-                    setSelectedCells(new Set([idx]));
-                  }
-                  onSelectElement(element);
-                }}
-                onMouseEnter={(e) => {
-                  // Drag-to-select: hold mouse button and drag across cells
-                  if (isDraggingSelection && isTableCellMode) {
-                    const newSelected = new Set(selectedCells);
-                    newSelected.add(idx);
-                    setSelectedCells(newSelected);
-                  }
-                }}
-                className={`border-2 p-2 flex items-center justify-center text-xs cursor-pointer transition-all overflow-hidden ${
-                  isMultiSelected
-                    ? 'border-purple-500 shadow-inner bg-purple-50'
-                    : isSingleSelected 
-                    ? 'border-blue-500 shadow-inner bg-blue-50' 
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                style={{
-                  backgroundColor: isMultiSelected ? 'rgba(168, 85, 247, 0.15)' : isSingleSelected ? 'rgba(59, 130, 246, 0.15)' : (cell.backgroundColor || '#ffffff'),
-                  color: cell.textColor || '#666666',
-                  position: 'relative',
-                  minHeight: '40px',
-                }}
-                title={`Cell ${idx + 1} - Click to select, Ctrl+Click to multi-select, drag edges to resize`}
-              >
-                <div className="truncate text-center w-full font-medium">{cell.content}</div>
-                
-                {/* Resize handles for selected cells */}
-                {isAnySelected && (
-                  <>
-                    {/* Right edge resize */}
-                    <div
-                      className="absolute right-0 top-0 bottom-0 w-2 bg-blue-500 cursor-col-resize hover:bg-blue-700 hover:w-3"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        setResizingCell({ tableId: element.id, cellIndex: idx, direction: 'width' });
-                        setCellResizeStart({ x: e.clientX, y: e.clientY });
-                      }}
-                      style={{ opacity: 0.8, transition: 'all 0.2s' }}
-                    />
-                    
-                    {/* Bottom edge resize */}
-                    <div
-                      className="absolute bottom-0 left-0 right-0 h-2 bg-blue-500 cursor-row-resize hover:bg-blue-700 hover:h-3"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        setResizingCell({ tableId: element.id, cellIndex: idx, direction: 'height' });
-                        setCellResizeStart({ x: e.clientX, y: e.clientY });
-                      }}
-                      style={{ opacity: 0.8, transition: 'all 0.2s' }}
-                    />
-                    
-                    {/* Corner resize */}
-                    <div
-                      className="absolute bottom-0 right-0 w-3 h-3 bg-blue-500 cursor-nwse-resize hover:bg-blue-700"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        setResizingCell({ tableId: element.id, cellIndex: idx, direction: 'both' });
-                        setCellResizeStart({ x: e.clientX, y: e.clientY });
-                      }}
-                      style={{ opacity: 0.8, transition: 'all 0.2s' }}
-                    />
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      );
     } else if (element.type === 'icon') {
       const iconStyle: React.CSSProperties = {
         fontSize: `${element.fontSize || 32}px`,
@@ -487,6 +397,8 @@ export default function EditorCanvas({
           <div className="p-2 text-xs text-gray-500">Pre-made Block</div>
         </div>
       );
+    } else if (element.type === 'table') {
+      content = <TableElement element={element} />;
     }
 
     return (
@@ -541,14 +453,14 @@ export default function EditorCanvas({
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center overflow-auto">
+    <div className="w-full flex items-start justify-center overflow-auto">
       <div
         ref={canvasRef}
         onClick={handleCanvasClick}
-        className="relative bg-gray-200 p-8 rounded-lg shadow-2xl"
+        className="relative bg-white"
         style={{
           transform: `scale(${zoom / 100})`,
-          transformOrigin: 'center center',
+          transformOrigin: 'top center',
           width: `${PAGE_WIDTH}px`,
           height: `${PAGE_HEIGHT}px`,
           minWidth: `${PAGE_WIDTH}px`,
@@ -556,7 +468,7 @@ export default function EditorCanvas({
         }}
       >
         {/* Page background */}
-        <div className="absolute inset-0 bg-white shadow-inner rounded" />
+        <div className="absolute inset-0 bg-white" />
         
         {/* Grid overlay (subtle) */}
         <div

@@ -11,17 +11,14 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 export interface TableCell {
-  id: string;
   content: string;
-  width?: number; // relative width (1-10)
-  height?: number; // relative height (1-10)
-  backgroundColor?: string;
-  textColor?: string;
+  rowSpan?: number;
+  colSpan?: number;
 }
 
 export interface CanvasElement {
   id: string;
-  type: 'text' | 'heading' | 'paragraph' | 'image' | 'shape' | 'table' | 'icon' | 'block';
+  type: 'text' | 'heading' | 'paragraph' | 'image' | 'shape' | 'icon' | 'block' | 'table';
   x: number;
   y: number;
   width: number;
@@ -42,9 +39,15 @@ export interface CanvasElement {
   src?: string;
   shapeType?: 'rectangle' | 'circle' | 'line';
   zIndex?: number;
+  // Table properties
   rows?: number;
   cols?: number;
-  cells?: TableCell[];
+  tableData?: TableCell[][];
+  rowHeights?: number[];
+  colWidths?: number[];
+  tableBorder?: string;
+  tableHeaderBg?: string;
+  tableCellBg?: string;
 }
 
 export default function Home() {
@@ -201,6 +204,38 @@ export default function Home() {
           img.style.height = '100%';
           img.style.objectFit = 'contain';
           elementDiv.appendChild(img);
+        } else if (element.type === 'table') {
+          const table = document.createElement('table');
+          table.style.width = '100%';
+          table.style.height = '100%';
+          table.style.borderCollapse = 'collapse';
+          table.style.border = element.tableBorder || '1px solid #ccc';
+          table.style.fontSize = '12px';
+          
+          const rows = element.rows || 3;
+          const cols = element.cols || 3;
+          const tableData = element.tableData || [];
+          const rowHeights = element.rowHeights || Array(rows).fill(element.height / rows);
+          const colWidths = element.colWidths || Array(cols).fill(element.width / cols);
+          
+          for (let r = 0; r < rows; r++) {
+            const tr = document.createElement('tr');
+            tr.style.height = `${rowHeights[r] || 40}px`;
+            
+            for (let c = 0; c < cols; c++) {
+              const td = document.createElement('td');
+              td.style.border = element.tableBorder || '1px solid #ccc';
+              td.style.padding = '8px';
+              td.style.width = `${colWidths[c] || element.width / cols}px`;
+              td.style.backgroundColor = r === 0 ? (element.tableHeaderBg || '#e5e7eb') : (element.tableCellBg || '#ffffff');
+              td.style.textAlign = 'left';
+              td.style.verticalAlign = 'middle';
+              td.textContent = tableData[r]?.[c]?.content || '';
+              tr.appendChild(td);
+            }
+            table.appendChild(tr);
+          }
+          elementDiv.appendChild(table);
         } else if (element.type === 'shape') {
           if (element.shapeType === 'circle') {
             elementDiv.style.borderRadius = '50%';
@@ -294,7 +329,7 @@ export default function Home() {
         </div>
         
         {/* Canvas Area */}
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center" ref={canvasContainerRef}>
+        <div className="flex-1 overflow-auto bg-white flex items-start justify-center p-0" ref={canvasContainerRef}>
           <EditorCanvas
             elements={elements}
             selectedElement={selectedElement}

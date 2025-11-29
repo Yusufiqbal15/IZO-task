@@ -10,7 +10,7 @@ interface LeftSidebarProps {
 }
 
 export default function LeftSidebar({ onAddElement, onLoadTemplate }: LeftSidebarProps) {
-  const [activeTab, setActiveTab] = useState<'fields' | 'templates'>('fields');
+  const [activeTab, setActiveTab] = useState<'fields' | 'templates' | 'elements'>('fields');
   const [activeFieldTab, setActiveFieldTab] = useState<'customer' | 'company' | 'financial' | 'dates'>('customer');
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -148,6 +148,21 @@ export default function LeftSidebar({ onAddElement, onLoadTemplate }: LeftSideba
             </div>
           </button>
           <button
+            onClick={() => setActiveTab('elements')}
+            className={`flex-1 px-4 py-3 text-sm font-semibold transition-all ${
+              activeTab === 'elements' 
+                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg' 
+                : 'text-slate-300 hover:text-white hover:bg-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Elements
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('templates')}
             className={`flex-1 px-4 py-3 text-sm font-semibold transition-all ${
               activeTab === 'templates' 
@@ -165,7 +180,7 @@ export default function LeftSidebar({ onAddElement, onLoadTemplate }: LeftSideba
         </div>
 
         {/* Merge Fields Tabs */}
-        {activeTab === 'fields' && (
+        {(activeTab === 'fields' || activeTab === 'elements') && (
           <div className="border-b border-slate-700 flex gap-0 mb-4">
             <button
               onClick={() => setActiveFieldTab('customer')}
@@ -212,7 +227,46 @@ export default function LeftSidebar({ onAddElement, onLoadTemplate }: LeftSideba
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-4 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
-          {activeTab === 'fields' ? (
+          {activeTab === 'elements' ? (
+            <div className="space-y-3">
+              <button onClick={() => handleAddElement({ type: 'heading', x: 100, y: 100, width: 300, height: 40, content: 'Heading Text', fontSize: 24, fontWeight: 'bold', fontStyle: 'normal', color: '#000000', zIndex: 0 })} className="w-full flex items-center gap-3 p-3 bg-slate-700 hover:bg-indigo-600 rounded-lg transition-all hover:translate-x-1 cursor-pointer group">
+                <svg className="w-4 h-4 text-indigo-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-white">Heading</div>
+                  <div className="text-xs text-slate-300">Large title text</div>
+                </div>
+              </button>
+              <button onClick={() => handleAddElement({ type: 'paragraph', x: 100, y: 150, width: 400, height: 60, content: 'Paragraph text goes here...', fontSize: 14, fontWeight: 'normal', fontStyle: 'normal', color: '#333333', zIndex: 0 })} className="w-full flex items-center gap-3 p-3 bg-slate-700 hover:bg-indigo-600 rounded-lg transition-all hover:translate-x-1 cursor-pointer group">
+                <svg className="w-4 h-4 text-indigo-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-white">Text</div>
+                  <div className="text-xs text-slate-300">Body text content</div>
+                </div>
+              </button>
+              <button onClick={() => handleAddElement({ type: 'image', x: 100, y: 300, width: 200, height: 200, zIndex: 0 })} className="w-full flex items-center gap-3 p-3 bg-slate-700 hover:bg-indigo-600 rounded-lg transition-all hover:translate-x-1 cursor-pointer group">
+                <svg className="w-4 h-4 text-indigo-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-white">Image</div>
+                  <div className="text-xs text-slate-300">Upload from device</div>
+                </div>
+              </button>
+              <button onClick={() => handleAddElement({ type: 'shape', x: 100, y: 200, width: 150, height: 150, shapeType: 'rectangle', backgroundColor: '#3b82f6', zIndex: 0 })} className="w-full flex items-center gap-3 p-3 bg-slate-700 hover:bg-indigo-600 rounded-lg transition-all hover:translate-x-1 cursor-pointer group">
+                <svg className="w-4 h-4 text-indigo-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-white">Box/Shape</div>
+                  <div className="text-xs text-slate-300">Colored rectangle</div>
+                </div>
+              </button>
+            </div>
+          ) : activeTab === 'fields' ? (
             <div className="space-y-2">
               {/* Customer Fields */}
               {activeFieldTab === 'customer' && (

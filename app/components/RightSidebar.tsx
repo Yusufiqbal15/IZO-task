@@ -19,7 +19,6 @@ export default function RightSidebar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,17 +104,6 @@ export default function RightSidebar({
                 Layout Options
               </h3>
               <div className="grid grid-cols-2 gap-2">
-                {/* Table */}
-                <button 
-                  onClick={() => onAddElement?.({ type: 'table', x: 100, y: 100, width: 500, height: 250, rows: 4, cols: 4, backgroundColor: '#ffffff', border: '1px solid #d1d5db', zIndex: 0 })}
-                  className="flex flex-col items-center p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all active:scale-95"
-                >
-                  <svg className="w-5 h-5 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-xs font-medium text-gray-700">Table</span>
-                </button>
-
                 {/* 1 Column */}
                 <button 
                   onClick={() => onAddElement?.({ type: 'shape', x: 100, y: 100, width: 500, height: 400, shapeType: 'rectangle', backgroundColor: '#f3f4f6', zIndex: 0 })}
@@ -202,6 +190,104 @@ export default function RightSidebar({
                   className="p-2 bg-white border border-gray-200 rounded hover:bg-purple-50 hover:border-purple-300 transition-all text-sm font-medium text-gray-700 active:scale-95"
                 >
                   Paragraph
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v6m0 0v6m0-6h6m0 0h6m-6 0V3m0 6v6" />
+                </svg>
+                Table Options
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
+                <button 
+                  onClick={() => {
+                    const rows = 3, cols = 3;
+                    const tableData = Array(rows).fill(null).map((_, r) => 
+                      Array(cols).fill(null).map((_, c) => ({ content: `R${r+1}C${c+1}` }))
+                    );
+                    const rowHeights = Array(rows).fill(40);
+                    const colWidths = Array(cols).fill(500/cols);
+                    onAddElement?.({ 
+                      type: 'table', 
+                      x: 50, 
+                      y: 100, 
+                      width: 500, 
+                      height: 120,
+                      rows,
+                      cols,
+                      tableData,
+                      rowHeights,
+                      colWidths,
+                      tableBorder: '1px solid #ccc',
+                      tableHeaderBg: '#e5e7eb',
+                      tableCellBg: '#ffffff',
+                      zIndex: 0 
+                    })
+                  }}
+                  className="p-2 bg-white border border-gray-200 rounded hover:bg-purple-50 hover:border-purple-300 transition-all text-xs font-medium text-gray-700 active:scale-95"
+                >
+                  3x3
+                </button>
+                <button 
+                  onClick={() => {
+                    const rows = 4, cols = 4;
+                    const tableData = Array(rows).fill(null).map((_, r) => 
+                      Array(cols).fill(null).map((_, c) => ({ content: `R${r+1}C${c+1}` }))
+                    );
+                    const rowHeights = Array(rows).fill(40);
+                    const colWidths = Array(cols).fill(500/cols);
+                    onAddElement?.({ 
+                      type: 'table', 
+                      x: 50, 
+                      y: 100, 
+                      width: 500, 
+                      height: 160,
+                      rows,
+                      cols,
+                      tableData,
+                      rowHeights,
+                      colWidths,
+                      tableBorder: '1px solid #ccc',
+                      tableHeaderBg: '#e5e7eb',
+                      tableCellBg: '#ffffff',
+                      zIndex: 0 
+                    })
+                  }}
+                  className="p-2 bg-white border border-gray-200 rounded hover:bg-purple-50 hover:border-purple-300 transition-all text-xs font-medium text-gray-700 active:scale-95"
+                >
+                  4x4
+                </button>
+                <button 
+                  onClick={() => {
+                    const rows = 5, cols = 5;
+                    const tableData = Array(rows).fill(null).map((_, r) => 
+                      Array(cols).fill(null).map((_, c) => ({ content: `R${r+1}C${c+1}` }))
+                    );
+                    const rowHeights = Array(rows).fill(40);
+                    const colWidths = Array(cols).fill(500/cols);
+                    onAddElement?.({ 
+                      type: 'table', 
+                      x: 50, 
+                      y: 100, 
+                      width: 500, 
+                      height: 200,
+                      rows,
+                      cols,
+                      tableData,
+                      rowHeights,
+                      colWidths,
+                      tableBorder: '1px solid #ccc',
+                      tableHeaderBg: '#e5e7eb',
+                      tableCellBg: '#ffffff',
+                      zIndex: 0 
+                    })
+                  }}
+                  className="p-2 bg-white border border-gray-200 rounded hover:bg-purple-50 hover:border-purple-300 transition-all text-xs font-medium text-gray-700 active:scale-95"
+                >
+                  5x5
                 </button>
               </div>
             </div>
@@ -406,7 +492,7 @@ export default function RightSidebar({
             )}
 
             {/* Box/Shape Properties */}
-            {(selectedElement.type === 'shape' || selectedElement.type === 'block' || selectedElement.type === 'table') && (
+            {(selectedElement.type === 'shape' || selectedElement.type === 'block') && (
               <div>
                 <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Appearance</h3>
                 <div className="space-y-3">
@@ -471,402 +557,6 @@ export default function RightSidebar({
                     />
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Table Properties */}
-            {selectedElement.type === 'table' && (
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Table Settings</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-2">
-                      Rows: {selectedElement.rows || 4}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleUpdate({ rows: Math.max(1, (selectedElement.rows || 4) - 1) })}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm font-medium"
-                      >
-                        −
-                      </button>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={selectedElement.rows || 4}
-                        onChange={(e) => handleUpdate({ rows: parseInt(e.target.value) })}
-                        className="flex-1"
-                      />
-                      <button
-                        onClick={() => handleUpdate({ rows: Math.min(10, (selectedElement.rows || 4) + 1) })}
-                        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm font-medium"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-2">
-                      Columns: {selectedElement.cols || 4}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleUpdate({ cols: Math.max(1, (selectedElement.cols || 4) - 1) })}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm font-medium"
-                      >
-                        −
-                      </button>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={selectedElement.cols || 4}
-                        onChange={(e) => handleUpdate({ cols: parseInt(e.target.value) })}
-                        className="flex-1"
-                      />
-                      <button
-                        onClick={() => handleUpdate({ cols: Math.min(10, (selectedElement.cols || 4) + 1) })}
-                        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm font-medium"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Table Cell Management */}
-            {selectedElement.type === 'table' && (
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Cell Management</h3>
-                <p className="text-xs text-gray-600 mb-2">Click a cell to select and customize</p>
-                
-                {/* Cell Grid Selector */}
-                <div className="mb-4">
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Select Cell</label>
-                  <div className="grid grid-cols-4 gap-1 max-h-40 overflow-y-auto border border-gray-200 rounded p-2">
-                    {Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedCellIndex(idx)}
-                        className={`p-2 text-xs rounded border transition-all font-medium ${
-                          selectedCellIndex === idx
-                            ? 'bg-blue-500 text-white border-blue-600 shadow-md'
-                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-                        }`}
-                      >
-                        {idx + 1}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Cell Content Editor */}
-                {selectedCellIndex !== null && (
-                  <div className="space-y-3 border-t pt-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Cell Content</label>
-                      <input
-                        type="text"
-                        defaultValue={`Cell ${selectedCellIndex + 1}`}
-                        onChange={(e) => {
-                          const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                            id: `cell-${i}`,
-                            content: i === 0 ? 'Header' : `Cell ${i}`,
-                            width: 1,
-                            height: 1,
-                            backgroundColor: '#ffffff',
-                            textColor: '#666666',
-                          }));
-                          cells[selectedCellIndex].content = e.target.value;
-                          handleUpdate({ cells });
-                        }}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter cell content"
-                      />
-                    </div>
-
-                    {/* Cell Width Control */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-2">Cell Width</label>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                              id: `cell-${i}`,
-                              content: i === 0 ? 'Header' : `Cell ${i}`,
-                              width: 1,
-                              height: 1,
-                              backgroundColor: '#ffffff',
-                              textColor: '#666666',
-                            }));
-                            cells[selectedCellIndex].width = Math.max(0.5, (cells[selectedCellIndex].width || 1) - 0.5);
-                            handleUpdate({ cells });
-                          }}
-                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-xs font-medium"
-                        >
-                          −
-                        </button>
-                        <input
-                          type="range"
-                          min="0.5"
-                          max="3"
-                          step="0.5"
-                          defaultValue="1"
-                          onChange={(e) => {
-                            const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                              id: `cell-${i}`,
-                              content: i === 0 ? 'Header' : `Cell ${i}`,
-                              width: 1,
-                              height: 1,
-                              backgroundColor: '#ffffff',
-                              textColor: '#666666',
-                            }));
-                            cells[selectedCellIndex].width = parseFloat(e.target.value);
-                            handleUpdate({ cells });
-                          }}
-                          className="flex-1"
-                        />
-                        <button
-                          onClick={() => {
-                            const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                              id: `cell-${i}`,
-                              content: i === 0 ? 'Header' : `Cell ${i}`,
-                              width: 1,
-                              height: 1,
-                              backgroundColor: '#ffffff',
-                              textColor: '#666666',
-                            }));
-                            cells[selectedCellIndex].width = Math.min(3, (cells[selectedCellIndex].width || 1) + 0.5);
-                            handleUpdate({ cells });
-                          }}
-                          className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-xs font-medium"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Width: 0.5x to 3x</p>
-                    </div>
-
-                    {/* Cell Height Control */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-2">Cell Height</label>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                              id: `cell-${i}`,
-                              content: i === 0 ? 'Header' : `Cell ${i}`,
-                              width: 1,
-                              height: 1,
-                              backgroundColor: '#ffffff',
-                              textColor: '#666666',
-                            }));
-                            cells[selectedCellIndex].height = Math.max(0.5, (cells[selectedCellIndex].height || 1) - 0.5);
-                            handleUpdate({ cells });
-                          }}
-                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-xs font-medium"
-                        >
-                          −
-                        </button>
-                        <input
-                          type="range"
-                          min="0.5"
-                          max="3"
-                          step="0.5"
-                          defaultValue="1"
-                          onChange={(e) => {
-                            const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                              id: `cell-${i}`,
-                              content: i === 0 ? 'Header' : `Cell ${i}`,
-                              width: 1,
-                              height: 1,
-                              backgroundColor: '#ffffff',
-                              textColor: '#666666',
-                            }));
-                            cells[selectedCellIndex].height = parseFloat(e.target.value);
-                            handleUpdate({ cells });
-                          }}
-                          className="flex-1"
-                        />
-                        <button
-                          onClick={() => {
-                            const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                              id: `cell-${i}`,
-                              content: i === 0 ? 'Header' : `Cell ${i}`,
-                              width: 1,
-                              height: 1,
-                              backgroundColor: '#ffffff',
-                              textColor: '#666666',
-                            }));
-                            cells[selectedCellIndex].height = Math.min(3, (cells[selectedCellIndex].height || 1) + 0.5);
-                            handleUpdate({ cells });
-                          }}
-                          className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-xs font-medium"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Height: 0.5x to 3x</p>
-                    </div>
-
-                    {/* Cell Background Color */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Background Color</label>
-                      <input
-                        type="color"
-                        defaultValue="#ffffff"
-                        onChange={(e) => {
-                          const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                            id: `cell-${i}`,
-                            content: i === 0 ? 'Header' : `Cell ${i}`,
-                            width: 1,
-                            height: 1,
-                            backgroundColor: '#ffffff',
-                            textColor: '#666666',
-                          }));
-                          cells[selectedCellIndex].backgroundColor = e.target.value;
-                          handleUpdate({ cells });
-                        }}
-                        className="w-full h-8 border border-gray-300 rounded-lg cursor-pointer"
-                      />
-                    </div>
-
-                    {/* Cell Text Color */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Text Color</label>
-                      <input
-                        type="color"
-                        defaultValue="#666666"
-                        onChange={(e) => {
-                          const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                            id: `cell-${i}`,
-                            content: i === 0 ? 'Header' : `Cell ${i}`,
-                            width: 1,
-                            height: 1,
-                            backgroundColor: '#ffffff',
-                            textColor: '#666666',
-                          }));
-                          cells[selectedCellIndex].textColor = e.target.value;
-                          handleUpdate({ cells });
-                        }}
-                        className="w-full h-8 border border-gray-300 rounded-lg cursor-pointer"
-                      />
-                    </div>
-
-                    {/* Merge Cells */}
-                    <div className="pt-2 border-t space-y-2">
-                      <p className="text-xs text-gray-600 font-medium">💡 Tip: Click and drag to select multiple cells</p>
-                      <p className="text-xs text-green-600 font-medium">✓ Or use Ctrl+Click for multi-select</p>
-                      <button
-                        onClick={() => {
-                          const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                            id: `cell-${i}`,
-                            content: i === 0 ? 'Header' : `Cell ${i}`,
-                            width: 1,
-                            height: 1,
-                            backgroundColor: '#ffffff',
-                            textColor: '#666666',
-                          }));
-                          
-                          // Merge current cell with next cell
-                          if (selectedCellIndex < cells.length - 1) {
-                            cells[selectedCellIndex].width = (cells[selectedCellIndex].width || 1) + (cells[selectedCellIndex + 1].width || 1);
-                            cells[selectedCellIndex].height = Math.max(cells[selectedCellIndex].height || 1, cells[selectedCellIndex + 1].height || 1);
-                            cells.splice(selectedCellIndex + 1, 1);
-                            handleUpdate({ cells, cols: (selectedElement.cols || 4) - 1 });
-                            setSelectedCellIndex(selectedCellIndex);
-                          }
-                        }}
-                        className="w-full px-3 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                      >
-                        🔗 Merge with Next Cell
-                      </button>
-                      
-                      <button
-                        onClick={() => {
-                          const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                            id: `cell-${i}`,
-                            content: i === 0 ? 'Header' : `Cell ${i}`,
-                            width: 1,
-                            height: 1,
-                            backgroundColor: '#ffffff',
-                            textColor: '#666666',
-                          }));
-                          
-                          // Merge current cell with cell below
-                          const cols = selectedElement.cols || 4;
-                          const nextRowIdx = selectedCellIndex + cols;
-                          if (nextRowIdx < cells.length) {
-                            cells[selectedCellIndex].height = (cells[selectedCellIndex].height || 1) + (cells[nextRowIdx].height || 1);
-                            cells[selectedCellIndex].width = Math.max(cells[selectedCellIndex].width || 1, cells[nextRowIdx].width || 1);
-                            cells.splice(nextRowIdx, 1);
-                            handleUpdate({ cells, rows: (selectedElement.rows || 4) - 1 });
-                            setSelectedCellIndex(selectedCellIndex);
-                          }
-                        }}
-                        className="w-full px-3 py-2 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-                      >
-                        🔗 Merge with Cell Below
-                      </button>
-                      
-                      <button
-                        onClick={() => {
-                          const cells = selectedElement.cells || Array.from({ length: (selectedElement.rows || 4) * (selectedElement.cols || 4) }).map((_, i) => ({
-                            id: `cell-${i}`,
-                            content: i === 0 ? 'Header' : `Cell ${i}`,
-                            width: 1,
-                            height: 1,
-                            backgroundColor: '#ffffff',
-                            textColor: '#666666',
-                          }));
-                          
-                          // Merge all adjacent cells in a rectangle
-                          const cols = selectedElement.cols || 4;
-                          const rows = selectedElement.rows || 4;
-                          
-                          // Find min and max indices
-                          const indices = Array.from({ length: cells.length }, (_, i) => i).filter((_, i) => {
-                            // Simple merge: merge selected cell with neighbors
-                            return i === selectedCellIndex || 
-                                   (i === selectedCellIndex + 1 && (selectedCellIndex + 1) % cols !== 0) ||
-                                   (i === selectedCellIndex + cols && selectedCellIndex + cols < cells.length);
-                          });
-                          
-                          if (indices.length > 1) {
-                            const minIdx = Math.min(...indices);
-                            const maxIdx = Math.max(...indices);
-                            
-                            // Combine widths and heights
-                            let totalWidth = 0;
-                            let totalHeight = 0;
-                            
-                            indices.forEach(idx => {
-                              totalWidth += cells[idx].width || 1;
-                              totalHeight += cells[idx].height || 1;
-                            });
-                            
-                            cells[minIdx].width = totalWidth / indices.length;
-                            cells[minIdx].height = totalHeight / indices.length;
-                            
-                            // Remove merged cells (in reverse order to maintain indices)
-                            indices.slice(1).reverse().forEach(idx => {
-                              cells.splice(idx, 1);
-                            });
-                            
-                            handleUpdate({ cells });
-                            setSelectedCellIndex(minIdx);
-                          }
-                        }}
-                        className="w-full px-3 py-2 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-                      >
-                        🔗 Merge Adjacent Cells
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -938,6 +628,146 @@ export default function RightSidebar({
                       onChange={(e) => handleUpdate({ borderRadius: parseFloat(e.target.value) })}
                       className="w-full"
                     />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Table Properties */}
+            {selectedElement.type === 'table' && (
+              <div>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Table Layout</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Rows: {selectedElement.rows || 3}</label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={selectedElement.rows || 3}
+                      onChange={(e) => {
+                        const newRows = parseInt(e.target.value);
+                        const currentRows = selectedElement.rows || 3;
+                        const cols = selectedElement.cols || 3;
+                        let newTableData = selectedElement.tableData || [];
+                        
+                        if (newRows > currentRows) {
+                          for (let i = currentRows; i < newRows; i++) {
+                            newTableData.push(Array(cols).fill(null).map(() => ({ content: '' })));
+                          }
+                        } else {
+                          newTableData = newTableData.slice(0, newRows);
+                        }
+                        
+                        const newRowHeights = Array(newRows).fill(40);
+                        handleUpdate({ rows: newRows, tableData: newTableData, rowHeights: newRowHeights });
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Columns: {selectedElement.cols || 3}</label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={selectedElement.cols || 3}
+                      onChange={(e) => {
+                        const newCols = parseInt(e.target.value);
+                        const currentCols = selectedElement.cols || 3;
+                        const rows = selectedElement.rows || 3;
+                        let newTableData = selectedElement.tableData || [];
+                        
+                        newTableData = newTableData.map(row => {
+                          if (newCols > currentCols) {
+                            return [...row, ...Array(newCols - currentCols).fill(null).map(() => ({ content: '' }))];
+                          } else {
+                            return row.slice(0, newCols);
+                          }
+                        });
+                        
+                        const newColWidths = Array(newCols).fill((selectedElement.width || 500) / newCols);
+                        handleUpdate({ cols: newCols, tableData: newTableData, colWidths: newColWidths });
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Row Height: {Math.round(selectedElement.rowHeights?.[0] || 40)}px</label>
+                    <input
+                      type="range"
+                      min="20"
+                      max="100"
+                      value={selectedElement.rowHeights?.[0] || 40}
+                      onChange={(e) => {
+                        const newHeight = parseFloat(e.target.value);
+                        const rows = selectedElement.rows || 3;
+                        const newRowHeights = Array(rows).fill(newHeight);
+                        handleUpdate({ rowHeights: newRowHeights, height: newHeight * rows });
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">Table Border</label>
+                    <input
+                      type="text"
+                      value={selectedElement.tableBorder || '1px solid #ccc'}
+                      onChange={(e) => handleUpdate({ tableBorder: e.target.value })}
+                      placeholder="e.g., 1px solid #ccc"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">Header Background</label>
+                    <input
+                      type="color"
+                      value={selectedElement.tableHeaderBg || '#e5e7eb'}
+                      onChange={(e) => handleUpdate({ tableHeaderBg: e.target.value })}
+                      className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">Cell Background</label>
+                    <input
+                      type="color"
+                      value={selectedElement.tableCellBg || '#ffffff'}
+                      onChange={(e) => handleUpdate({ tableCellBg: e.target.value })}
+                      className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {/* Table Content Editor */}
+                <div className="mt-6 pt-6 border-t border-gray-300">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Edit Content</h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    {Array(selectedElement.rows || 3).fill(null).map((_, rowIdx) => (
+                      <div key={rowIdx} className="mb-3 pb-3 border-b border-gray-300 last:border-b-0">
+                        <div className="text-xs font-semibold text-gray-600 mb-2">Row {rowIdx + 1}</div>
+                        <div className="space-y-2">
+                          {Array(selectedElement.cols || 3).fill(null).map((_, colIdx) => (
+                            <input
+                              key={`${rowIdx}-${colIdx}`}
+                              type="text"
+                              value={selectedElement.tableData?.[rowIdx]?.[colIdx]?.content || ''}
+                              onChange={(e) => {
+                                const newTableData = [...(selectedElement.tableData || [])];
+                                if (!newTableData[rowIdx]) {
+                                  newTableData[rowIdx] = [];
+                                }
+                                newTableData[rowIdx][colIdx] = {
+                                  content: e.target.value,
+                                };
+                                handleUpdate({ tableData: newTableData });
+                              }}
+                              placeholder={`Col ${colIdx + 1}`}
+                              className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
