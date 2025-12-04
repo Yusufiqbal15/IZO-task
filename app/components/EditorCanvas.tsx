@@ -94,13 +94,6 @@ export default function EditorCanvas({
       return; // Let resize handler take over
     }
     
-    // Don't drag if clicking on a table cell (allow editing)
-    if (element.type === 'table' && e.target instanceof HTMLElement && e.target.tagName === 'TD') {
-      e.stopPropagation();
-      onSelectElement(element);
-      return;
-    }
-    
     e.stopPropagation();
     onSelectElement(element);
     
@@ -269,6 +262,7 @@ export default function EditorCanvas({
           borderCollapse: 'collapse',
           border: tableBorder,
           fontSize: '12px',
+          pointerEvents: 'none',
         }}
       >
         <tbody>
@@ -295,15 +289,6 @@ export default function EditorCanvas({
                       fontFamily: 'Arial, sans-serif',
                       outline: 'none',
                       userSelect: 'none',
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onMouseMove={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
                     }}
                   >
                     {cellData?.content || ''}
