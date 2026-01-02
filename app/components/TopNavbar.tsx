@@ -11,6 +11,7 @@ interface TopNavbarProps {
   onExport: () => void;
   onNew: () => void;
   onTemplateSelect?: (template: any) => void;
+  onPDFUpload?: () => void;
 }
 
 export default function TopNavbar({
@@ -23,6 +24,7 @@ export default function TopNavbar({
   onExport,
   onNew,
   onTemplateSelect,
+  onPDFUpload,
 }: TopNavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -249,6 +251,25 @@ export default function TopNavbar({
               </div>
             )}
           </div>
+
+          {onPDFUpload && (
+            <div className="relative group">
+              <button
+                onClick={onPDFUpload}
+                className="p-2 hover:bg-blue-700 rounded-lg transition-colors text-white"
+                title="Upload PDF"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </button>
+              {!isMobile && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                  Upload PDF
+                </div>
+              )}
+            </div>
+          )}
           
           <button
             onClick={onExport}

@@ -6,6 +6,8 @@ import LeftSidebar from './components/LeftSidebar';
 import RightSidebar from './components/RightSidebar';
 import TopNavbar from './components/TopNavbar';
 import StartPage from './components/StartPage';
+import PDFUploadModal from './components/PDFUploadModal';
+import PDFTemplatePopulator from './components/PDFTemplatePopulator';
 import { templates, Template } from './data/templates';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -57,6 +59,9 @@ export default function Home() {
   const [history, setHistory] = useState<CanvasElement[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showEditor, setShowEditor] = useState(false);
+  const [showPDFUploadModal, setShowPDFUploadModal] = useState(false);
+  const [showPDFTemplatePopulator, setShowPDFTemplatePopulator] = useState(false);
+  const [isUploadingPDF, setIsUploadingPDF] = useState(false);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const saveToHistory = useCallback((newElements: CanvasElement[]) => {
@@ -118,6 +123,54 @@ export default function Home() {
     setHistory([[]]);
     setHistoryIndex(0);
     setShowEditor(true);
+  }, []);
+
+  const handlePopulateTemplate = useCallback((newElements: Omit<CanvasElement, 'id'>[]) => {
+    // Convert elements to full CanvasElement with IDs
+    const elementsWithIds: CanvasElement[] = newElements.map((el) => ({
+      ...el,
+      id: `element-${Date.now()}-${Math.random()}`,
+      zIndex: newElements.indexOf(el),
+    }));
+    
+    setElements(elementsWithIds);
+    saveToHistory(elementsWithIds);
+    setSelectedElement(null);
+    setShowPDFTemplatePopulator(false);
+    setShowEditor(true);
+  }, [saveToHistory]);
+
+  const handlePDFUpload = useCallback(async (file: File) => {
+    setIsUploadingPDF(true);
+    try {
+      // Send PDF to extract API
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/pdf-extract', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to extract PDF data');
+      }
+
+      const result = await response.json();
+      
+      // Store PDF data in session storage for the template populator
+      sessionStorage.setItem('pdfData', JSON.stringify(result));
+      
+      // Close upload modal and show template populator
+      setShowPDFUploadModal(false);
+      setShowPDFTemplatePopulator(true);
+    } catch (error) {
+      console.error('PDF upload error:', error);
+      alert(`Error processing PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsUploadingPDF(false);
+    }
   }, []);
 
   const handleUndo = useCallback(() => {
@@ -297,59 +350,85 @@ export default function Home() {
   // Show start page if no editor is active
   if (!showEditor) {
     return (
-      <StartPage
-        onSelectTemplate={handleLoadTemplate}
-        onCreateBlank={handleCreateBlankDocument}
-      />
+      <>
+        <StartPage
+          onSelectTemplate={handleLoadTemplate}
+          onCreateBlank={handleCreateBlankDocument}
+          onPDFUpload={() => setShowPDFUploadModal(true)}
+        />
+        <PDFUploadModal
+          isOpen={showPDFUploadModal}
+          onClose={() => setShowPDFUploadModal(false)}
+          onUpload={handlePDFUpload}
+          isLoading={isUploadingPDF}
+        />
+      </>
     );
   }
 
   // Show editor
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden">
-      <TopNavbar
-        zoom={zoom}
-        onZoomChange={setZoom}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        canUndo={historyIndex > 0}
-        canRedo={historyIndex < history.length - 1}
-        onExport={handleExport}
-        onNew={() => {
-          setShowEditor(false);
-        }}
-        />
-      <div className="flex flex-1 overflow-hidden gap-0">
-        {/* Left Sidebar */}
-        <div className="hidden lg:block">
-          <LeftSidebar
-            onAddElement={handleAddElement}
-            onLoadTemplate={handleLoadTemplate}
+    <>
+      <div className="flex flex-col h-screen bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden">
+        <TopNavbar
+          zoom={zoom}
+          onZoomChange={setZoom}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={historyIndex > 0}
+          canRedo={historyIndex < history.length - 1}
+          onExport={handleExport}
+          onNew={() => {
+            setShowEditor(false);
+          }}
+          onPDFUpload={() => setShowPDFUploadModal(true)}
           />
-        </div>
-        
-        {/* Canvas Area */}
-        <div className="flex-1 overflow-auto bg-white flex items-start justify-center p-0" ref={canvasContainerRef}>
-          <EditorCanvas
-            elements={elements}
-            selectedElement={selectedElement}
-            onSelectElement={setSelectedElement}
-            onUpdateElement={handleUpdateElement}
-            onDeleteElement={handleDeleteElement}
-            zoom={zoom}
-          />
-        </div>
-        
-        {/* Right Sidebar */}
-        <div className="hidden md:block">
-          <RightSidebar
-            selectedElement={selectedElement}
-            onUpdateElement={handleUpdateElement}
-            onDeleteElement={handleDeleteElement}
-            onAddElement={handleAddElement}
-          />
+        <div className="flex flex-1 overflow-hidden gap-0">
+          {/* Left Sidebar */}
+          <div className="hidden lg:block">
+            <LeftSidebar
+              onAddElement={handleAddElement}
+              onLoadTemplate={handleLoadTemplate}
+            />
+          </div>
+          
+          {/* Canvas Area */}
+          <div className="flex-1 overflow-auto bg-white flex items-start justify-center p-0" ref={canvasContainerRef}>
+            <EditorCanvas
+              elements={elements}
+              selectedElement={selectedElement}
+              onSelectElement={setSelectedElement}
+              onUpdateElement={handleUpdateElement}
+              onDeleteElement={handleDeleteElement}
+              zoom={zoom}
+            />
+          </div>
+          
+          {/* Right Sidebar */}
+          <div className="hidden md:block">
+            <RightSidebar
+              selectedElement={selectedElement}
+              onUpdateElement={handleUpdateElement}
+              onDeleteElement={handleDeleteElement}
+              onAddElement={handleAddElement}
+            />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Modals */}
+      <PDFUploadModal
+        isOpen={showPDFUploadModal}
+        onClose={() => setShowPDFUploadModal(false)}
+        onUpload={handlePDFUpload}
+        isLoading={isUploadingPDF}
+      />
+      {showPDFTemplatePopulator && (
+        <PDFTemplatePopulator
+          onPopulateTemplate={handlePopulateTemplate}
+          onClose={() => setShowPDFTemplatePopulator(false)}
+        />
+      )}
+    </>
   );
 }
